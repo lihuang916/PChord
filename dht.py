@@ -1,28 +1,22 @@
 # A Distributed Hash Table implementation
 
+
 class Node:
     def __init__(self, ID, nxt = None, prev = None):
         self.ID = ID
         self.data = dict()
+        self.next = nxt
         self.prev = prev
-        self.fingerTable = [nxt]
 
-    # Update the finger table of this node when necessary
-    def updateFingerTable(self, dht, k):
-        del self.fingerTable[1:]
-        for i in range(1, k):
-            self.fingerTable.append(dht.findNode(dht._startNode, self.ID + 2 ** i))
-
-        
 class DHT:
-    # The total number of IDs available in the DHT is 2 ** k
-    def __init__(self, k):
-        self._k = k
-        self._size = 2 ** k    
-        self._startNode = Node(0, k)
-        self._startNode.fingerTable[0] = self._startNode
+    # Size is the total number of IDs available in the DHT
+    # Typically, this number is powers of 2
+    def __init__(self, size):
+        self._size = size    
+        self._startNode = Node(0)
+        self._startNode.next = self._startNode
         self._startNode.prev = self._startNode
-        self._startNode.updateFingerTable(self, k)
+
 
     # Hash function used to get the ID
     def getHashId(self, key):
@@ -42,9 +36,9 @@ class DHT:
             return 0
         node = self._startNode
         n = 1
-        while node.fingerTable[0] != self._startNode:
+        while node.next != self._startNode:
             n = n + 1
-            node = node.fingerTable[0]
+            node = node.next
         return n
     
     # Find the node responsible for the key
@@ -52,11 +46,11 @@ class DHT:
         hashId = self.getHashId(key)
         curr = start
         while self.distance(curr.ID, hashId) > \
-              self.distance(curr.fingerTable[0].ID, hashId):
-            curr = curr.fingerTable[0]
+              self.distance(curr.next.ID, hashId):
+            curr = curr.next
         if hashId == curr.ID:
             return curr
-        return curr.fingerTable[0]
+        return curr.next
 
     # Look up a key in the DHT
     def lookup(self, start, key):
@@ -89,10 +83,10 @@ class DHT:
 
         # Update the prev and next pointers
         prevNode = origNode.prev
-        newNode.fingerTable[0] = origNode
+        newNode.next = origNode
         newNode.prev = prevNode
         origNode.prev = newNode
-        prevNode.fingerTable[0] = newNode
+        prevNode.next = newNode
 
         # Delete keys that have been moved to new node
         for key in list(origNode.data.keys()):
@@ -104,26 +98,29 @@ class DHT:
     def leave(self, node):
         # Copy all its key-value pairs to its successor in the system
         for k, v in node.data.items():
-            node.fingerTable[0].data[k] = v
+            node.next.data[k] = v
         # If this node is the only node in the system.
-        if node.fingerTable[0] == node:
+        if node.next == node:
             self._startNode = None
         else:
-            node.prev.fingerTable[0] = node.fingerTable[0]
-            node.fingerTable[0] = prev = node.prev
+            node.prev.next = node.next
+            node.next.prev = node.prev
             # If this deleted node was an entry point to the system, we
             # need to choose another entry point. Simply choose its successor
             if self._startNode == node:
-                self._startNode = node.fingerTable[0]
-    
+                self._startNode = node.next
 
+    # TODO: avoid duplicate nodes. 
+        
+
+            
 
 def main():
     pass
 
-d = DHT(7)
+d = DHT(128)
 d.store(d._startNode, 50, "hello")
-print(d.lookup(d._startNode, 50))
+d.lookup(d._startNode, 50)
 d.join(Node(60))
 print(d.lookup(d._startNode, 50))
 d.join(Node(40))
@@ -132,7 +129,6 @@ d.join(Node(55))
 print(d.lookup(d._startNode, 50))      
 d.join(Node(50))
 print(d.lookup(d._startNode, 50))
-d.join(Node(50))
     
 if __name__ == "__main__":
     main()
