@@ -1,5 +1,8 @@
 # A Distributed Hash Table implementation
 
+from random import randint
+
+
 class Node:
     def __init__(self, ID, nxt = None, prev = None):
         self.ID = ID
@@ -105,6 +108,9 @@ class DHT:
         newNode.prev = prevNode
         origNode.prev = newNode
         prevNode.fingerTable[0] = newNode
+    
+        # Set up finger table of the new node
+        newNode.updateFingerTable(self, self._k)
 
         # Delete keys that have been moved to new node
         for key in list(origNode.data.keys()):
@@ -132,18 +138,17 @@ class DHT:
 def main():
     pass
 
-d = DHT(7)
+d = DHT(10)
 d.store(d._startNode, 50, "hello")
 print(d.lookup(d._startNode, 50))
-d.join(Node(60))
-print(d.lookup(d._startNode, 50))
-d.join(Node(40))
-print(d.lookup(d._startNode, 50))      
-d.join(Node(55))
-print(d.lookup(d._startNode, 50))      
-d.join(Node(50))
-print(d.lookup(d._startNode, 50))
-d.join(Node(50))
+for i in range(10, 1024, 10):
+    d.join(Node(i))
+
+#for i in range(0, 1000):
+#    r = randint(0, 10000)
+#    d.store(d._startNode, r, "hello" + str(i))
+
+print(d.lookup(d._startNode, 500))
     
 if __name__ == "__main__":
     main()
