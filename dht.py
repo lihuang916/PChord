@@ -138,17 +138,5 @@ class DHT:
 def main():
     pass
 
-d = DHT(10)
-d.store(d._startNode, 50, "hello")
-print(d.lookup(d._startNode, 50))
-for i in range(10, 1024, 10):
-    d.join(Node(i))
-
-#for i in range(0, 1000):
-#    r = randint(0, 10000)
-#    d.store(d._startNode, r, "hello" + str(i))
-
-print(d.lookup(d._startNode, 500))
-    
 if __name__ == "__main__":
     main()
