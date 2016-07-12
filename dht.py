@@ -51,12 +51,24 @@ class DHT:
     def findNode(self, start, key):
         hashId = self.getHashId(key)
         curr = start
-        while self.distance(curr.ID, hashId) > \
-              self.distance(curr.fingerTable[0].ID, hashId):
-            curr = curr.fingerTable[0]
-        if hashId == curr.ID:
-            return curr
-        return curr.fingerTable[0]
+        numJumps = 0
+        while True:
+            if curr.ID == hashId:
+                print("number of jumps: ", numJumps)
+                return curr
+            if self.distance(curr.ID, hashId) <= self.distance(curr.fingerTable[0].ID, hashId):
+                print("number of jumps: ", numJumps)
+                return curr.fingerTable[0]
+            tabSize = len(curr.fingerTable)
+            i = 0;
+            nextNode = curr.fingerTable[-1]
+            while i < tabSize - 1:
+                if self.distance(curr.fingerTable[i].ID, hashId) < self.distance(curr.fingerTable[i + 1].ID, hashId):
+                    nextNode = curr.fingerTable[i]
+                i = i + 1
+            curr = nextNode
+            numJumps += 1
+            
 
     # Look up a key in the DHT
     def lookup(self, start, key):
@@ -116,7 +128,6 @@ class DHT:
             if self._startNode == node:
                 self._startNode = node.fingerTable[0]
     
-
 
 def main():
     pass
