@@ -137,10 +137,3 @@ class DHT:
         while curr != self._startNode:
             curr.updateFingerTable(self, self._k)
             curr = curr.fingerTable[0]
-            
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()
