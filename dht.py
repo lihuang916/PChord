@@ -1,8 +1,5 @@
 # A Distributed Hash Table implementation
 
-from random import randint
-
-
 class Node:
     def __init__(self, ID, nxt = None, prev = None):
         self.ID = ID
@@ -76,7 +73,7 @@ class DHT:
     # Look up a key in the DHT
     def lookup(self, start, key):
         nodeForKey = self.findNode(start, key)
-        print("The key is in node: ", nodeForKey.ID)
+        # print("The key is in node: ", nodeForKey.ID)
         return nodeForKey.data[key]
 
     # Store a key-value pair in the DHT
@@ -89,7 +86,7 @@ class DHT:
         # Find the node before which the new node should be inserted
         origNode = self.findNode(self._startNode, newNode.ID)
 
-        print(origNode.ID, "  ", newNode.ID)
+        # print(origNode.ID, "  ", newNode.ID)
         # If there is a node with the same id, decline the join request for now
         if origNode.ID == newNode.ID:
             print("There is already a node with the same id!")
@@ -134,6 +131,13 @@ class DHT:
             if self._startNode == node:
                 self._startNode = node.fingerTable[0]
     
+    def updateAllFingerTables(self):
+        self._startNode.updateFingerTable(self, self._k)
+        curr = self._startNode.fingerTable[0]
+        while curr != self._startNode:
+            curr.updateFingerTable(self, self._k)
+            curr = curr.fingerTable[0]
+            
 
 def main():
     pass
