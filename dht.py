@@ -73,8 +73,10 @@ class DHT:
     # Look up a key in the DHT
     def lookup(self, start, key):
         nodeForKey = self.findNode(start, key)
-        # print("The key is in node: ", nodeForKey.ID)
-        return nodeForKey.data[key]
+        if key in nodeForKey.data:
+            # print("The key is in node: ", nodeForKey.ID)
+            return nodeForKey.data[key]
+        return None
 
     # Store a key-value pair in the DHT
     def store(self, start, key, value):

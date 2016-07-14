@@ -6,7 +6,7 @@ d = DHT(10)
 
 # Add nodes
 for i in range(120):
-    r = randint(0, 10000)
+    r = randint(0, 10240)
     d.join(Node(r))
 
 d.updateAllFingerTables();
